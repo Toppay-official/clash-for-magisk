@@ -1,0 +1,138 @@
+
+  # akun tunggal path akun, mode standar: ruleset grup, Internet, BlockBokep, block ads
+proxies:
+##########################################################
+##########################################################
+proxy-providers:
+  Akun:
+    type: http
+    path: ./akun/akun.yaml
+    url: https://raw.githubusercontent.com/Toppay-official/clash-for-magisk/main/akun.yaml
+    health-check:
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 300
+##########################################################
+##########################################################
+proxy-groups:
+  - name: Internet # 1 selector awal
+    type: select
+    proxies:
+      - FALLBACK
+      - Load Balance
+      - Best Ping
+      - DIRECT
+      - REJECT
+    use:
+      - Akun
+
+##########################################################
+  - name: BlockBokep
+    type: select
+    url: http://www.gstatic.com/generate_204
+    interval: 300
+    proxies:
+      - REJECT
+      - Internet
+
+  - name: BlockADS
+    type: select
+    url: http://www.gstatic.com/generate_204
+    interval: 300
+    proxies:
+      - REJECT
+      - Internet
+
+##########################################################
+  #jangan di rubah
+##########################################################
+  - name: FALLBACK
+    type: fallback
+    url: http://cp.cloudflare.com/generate_204
+    strategy: consistent-hashing
+    ninterval: 300
+    tolerance: 300
+    use:
+      - Akun
+
+  - name: Load Balance
+    type: load-balance
+    url: http://cp.cloudflare.com/generate_204
+    strategy: consistent-hashing
+    ninterval: 300
+    tolerance: 300
+    use:
+      - Akun
+
+  - name: Best Ping
+    type: url-test
+    url: http://cp.cloudflare.com/generate_204
+    strategy: consistent-hashing
+    ninterval: 300
+    tolerance: 300
+    use:
+      - Akun
+
+##########################################################
+rule-providers:
+################################ ads block
+  AntiAd:
+    type: file
+    behavior: domain
+    url: "https://raw.githubusercontent.com/privacy-protection-tools/anti-AD/master/anti-ad-clash.yaml"
+    path: ./ruleset/anti-AD.yaml
+    interval: 86400
+  adblock_energized_blu:
+    type: file
+    behavior: classical
+    path: "./ruleset/energized_blu_adblock.yaml"
+    url: https://raw.githubusercontent.com/hillz2/openclash_adblock/main/energized_blu_adblock.yaml
+    interval: 14400 # Update rules every 4 hours
+  adblock_abpindo_annoyance:
+    type: file
+    behavior: classical
+    path: "./ruleset/abpindo_annoyance_adblock.yaml"
+    url: https://raw.githubusercontent.com/hillz2/openclash_adblock/main/abpindo_annoyance_adblock.yaml
+    interval: 14400 # Update rules every 4 hours
+
+################################ ruleset
+  Clasher:
+    type: file
+    behavior: domain
+    url: https://howdy.id/download/rules/clash.txt
+    path: "./ruleset/clasher.yaml"
+    interval: 86400
+
+  BlockBokep:
+    type: file
+    behavior: domain
+    path: "./ruleset/blockbokep.yaml"
+
+  ####################### rules #######################
+rules:
+  - DOMAIN-KEYWORD,ads,REJECT,no-resolve
+  - DOMAIN-SUFFIX,ad.com,REJECT
+  - DOMAIN-SUFFIX,ad.com,REJECT
+  - IP-CIDR,127.0.0.1/32,REJECT,no-resolve #fix dns bocor
+  - IP-CIDR6,::1/128,REJECT,no-resolve #fix dns bocor
+  - DST-PORT,7895,REJECT
+  - DST-PORT,7892,REJECT
+  ###################### Block ADS #######################
+  - RULE-SET,AntiAd,BlockADS
+  - RULE-SET,adblock_energized_blu,BlockADS
+  - RULE-SET,adblock_abpindo_annoyance,BlockADS
+  ################### by Toppay Official #################
+  - RULE-SET,BlockBokep,BlockBokep
+  - RULE-SET,Clasher,REJECT
+  - GEOIP,CN,DIRECT
+  - MATCH,Internet
+
+
+
+
+
+
+
+
+
+
